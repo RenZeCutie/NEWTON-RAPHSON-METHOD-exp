@@ -8,42 +8,42 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans">
+<body class="bg-[#F1F3FF] text-slate-800 font-sans">
 
     <div class="max-w-4xl mx-auto py-10 px-4">
         <header class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold text-blue-600 mb-2">Newton-Raphson Solver</h1>
+            <h1 class="text-4xl font-extrabold text-[#F99FC9] mb-2">Newton-Raphson Solver</h1>
             <p class="text-slate-500">Solve complex exponential equations using the "Getting Warmer" method.</p>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             
-            <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                <h2 class="text-xl font-bold mb-4 border-b pb-2">1. Input Equation</h2>
+            <div class="bg-white p-6 rounded-xl shadow-md border border-[#F7CED7]">
+                <h2 class="text-xl font-bold mb-4 border-b border-[#F7CED7] pb-2 text-slate-700">1. Input Equation</h2>
                 
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">Function f(x)</label>
                         <input id="equation" type="text" value="e^x - 5" 
-                               class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none">
+                               class="w-full p-2 border border-[#F7CED7] rounded focus:ring-2 focus:ring-[#F99FC9] outline-none">
                         <p class="text-xs text-slate-400 mt-1">Use 'e^x' for exponentials.</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium mb-1">Initial Guess (x₀)</label>
                         <input id="guess" type="number" value="1" 
-                               class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none">
+                               class="w-full p-2 border border-[#F7CED7] rounded focus:ring-2 focus:ring-[#F99FC9] outline-none">
                     </div>
 
                     <button onclick="solve()" 
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition">
+                            class="w-full bg-[#F99FC9] hover:opacity-90 text-white font-bold py-2 rounded transition shadow-sm">
                         Solve Now
                     </button>
                 </div>
 
-                <div class="mt-8 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                    <h3 class="text-sm font-bold text-amber-800 uppercase">Fail-Safe Tips</h3>
-                    <ul class="text-xs text-amber-700 list-disc ml-4 mt-2 space-y-1">
+                <div class="mt-8 p-3 bg-[#F7CED7] bg-opacity-30 rounded-lg border border-[#F7CED7]">
+                    <h3 class="text-sm font-bold text-slate-700 uppercase">Fail-Safe Tips</h3>
+                    <ul class="text-xs text-slate-600 list-disc ml-4 mt-2 space-y-1">
                         <li>If it fails, try a different starting guess.</li>
                         <li>Avoid points where the slope is zero.</li>
                         <li>The equation must equal zero ($f(x) = 0$).</li>
@@ -53,20 +53,20 @@
 
             <div class="md:col-span-2 space-y-6">
                 
-                <div id="resultCard" class="hidden bg-blue-600 text-white p-6 rounded-xl shadow-lg">
+                <div id="resultCard" class="hidden bg-[#F99FC9] text-white p-6 rounded-xl shadow-lg">
                     <h2 class="text-lg opacity-80 uppercase tracking-widest font-bold">The Answer</h2>
                     <p id="finalAnswer" class="text-5xl font-mono font-bold mt-2">0.0000</p>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                    <h2 class="text-xl font-bold mb-4">Graph Visualization</h2>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-[#F7CED7]">
+                    <h2 class="text-xl font-bold mb-4 text-slate-700">Graph Visualization</h2>
                     <canvas id="resultChart" height="150"></canvas>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200 overflow-x-auto">
-                    <h2 class="text-xl font-bold mb-4">Step-by-Step Iterations</h2>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-[#F7CED7] overflow-x-auto">
+                    <h2 class="text-xl font-bold mb-4 text-slate-700">Step-by-Step Iterations</h2>
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-100 uppercase text-slate-600 text-xs">
+                        <thead class="bg-[#F7CED7] uppercase text-slate-700 text-xs">
                             <tr>
                                 <th class="p-2">n</th>
                                 <th class="p-2">xₙ (Guess)</th>
@@ -83,64 +83,50 @@
     </div>
 
     <script>
-        let myChart; // Variable to store the chart instance
+        let myChart; 
 
-        /**
-         * THE MATH ENGINE
-         * This function runs when the user clicks "Solve Now"
-         */
         function solve() {
             const expInput = document.getElementById('equation').value;
             const x0 = parseFloat(document.getElementById('guess').value);
             const tableBody = document.getElementById('tableBody');
             
-            // 1. Prepare for math
-            tableBody.innerHTML = ''; // Clear old table data
+            tableBody.innerHTML = ''; 
             const iterations = [];
             let xCurr = x0;
-            const tolerance = 0.0001; // How close to zero we want to get
+            const tolerance = 0.0001; 
             const maxSteps = 20;
 
             try {
-                // Use Math.js to parse the function and find the derivative automatically
                 const f = math.parse(expInput).compile();
                 const derivative = math.derivative(expInput, 'x').compile();
 
-                // 2. The Newton-Raphson Loop
                 for (let n = 0; n <= maxSteps; n++) {
                     const fx = f.evaluate({ x: xCurr });
                     const dfx = derivative.evaluate({ x: xCurr });
 
-                    // Store data for table and chart
                     iterations.push({ n: n, x: xCurr, y: fx });
                     
-                    // Add row to table
                     tableBody.innerHTML += `
-                        <tr class="border-b">
+                        <tr class="border-b border-[#F7CED7]">
                             <td class="p-2 font-bold">${n}</td>
                             <td class="p-2 font-mono">${xCurr.toFixed(6)}</td>
                             <td class="p-2 font-mono">${fx.toFixed(6)}</td>
                         </tr>
                     `;
 
-                    // Check if we found the root (fx is close to 0)
                     if (Math.abs(fx) < tolerance) break;
 
-                    // Divide-by-zero Fail-safe
                     if (Math.abs(dfx) < 0.000001) {
                         alert("Slope is too flat! Try a different starting guess.");
                         return;
                     }
 
-                    // Newton-Raphson Formula: xNext = xCurr - f(x)/f'(x)
                     xCurr = xCurr - (fx / dfx);
                 }
 
-                // Show the result card and final value
                 document.getElementById('resultCard').classList.remove('hidden');
                 document.getElementById('finalAnswer').innerText = xCurr.toFixed(6);
 
-                // Update the chart
                 updateChart(iterations, f);
 
             } catch (err) {
@@ -149,17 +135,11 @@
             }
         }
 
-        /**
-         * THE MAGIC VISUALIZATION
-         * This draws the function and the points where the math "guessed"
-         */
         function updateChart(iterations, f) {
             const ctx = document.getElementById('resultChart').getContext('2d');
             
-            // Destroy previous chart if it exists to refresh cleanly
             if (myChart) myChart.destroy();
 
-            // Generate values for the smooth curve
             const labels = [];
             const data = [];
             const startX = iterations[0].x - 2;
@@ -178,16 +158,16 @@
                         {
                             label: 'f(x) Curve',
                             data: data,
-                            borderColor: '#3b82f6',
-                            borderWidth: 2,
+                            borderColor: '#F99FC9', // Curve color updated
+                            borderWidth: 3,
                             pointRadius: 0,
                             fill: false
                         },
                         {
                             label: 'Newton Steps',
                             data: iterations.map(it => ({x: it.x.toFixed(1), y: it.y})),
-                            backgroundColor: '#ef4444',
-                            borderColor: '#ef4444',
+                            backgroundColor: '#F99FC9', // Step points updated
+                            borderColor: '#F99FC9',
                             showLine: false,
                             pointRadius: 6,
                             pointStyle: 'circle'
@@ -197,7 +177,13 @@
                 options: {
                     responsive: true,
                     scales: {
-                        y: { beginAtZero: false }
+                        y: { 
+                            beginAtZero: false,
+                            grid: { color: '#F7CED7' } // Grid lines updated
+                        },
+                        x: {
+                            grid: { color: '#F7CED7' }
+                        }
                     }
                 }
             });
