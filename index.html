@@ -7,66 +7,85 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Smooth transitions for layout dragging/resizing */
+        .layout-card {
+            transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease;
+        }
+    </style>
 </head>
-<body class="bg-[#F7CED7] text-slate-800 font-sans">
+<body class="bg-[#F7CED7] text-slate-800 font-sans overflow-x-hidden">
 
-    <div class="max-w-4xl mx-auto py-10 px-4">
+    <div id="layoutEditor" class="fixed top-4 right-4 z-50 bg-white shadow-2xl rounded-xl border-2 border-[#F99FC9] w-80 transform transition-transform translate-x-0">
+        <div class="bg-[#F99FC9] text-white p-3 rounded-t-lg flex justify-between items-center cursor-pointer" onclick="toggleEditor()">
+            <h3 class="font-bold tracking-widest uppercase text-sm">⚙️ Layout Editor</h3>
+            <span id="editorToggleIcon">▼</span>
+        </div>
+        
+        <div id="editorContent" class="p-4 max-h-[70vh] overflow-y-auto hidden">
+            <p class="text-xs text-slate-500 mb-4">Edit the positions (px or %) and sizes of the cards. Edits save automatically!</p>
+            
+            <div id="editor-fields" class="space-y-6">
+                </div>
+
+            <div class="mt-6 flex gap-2">
+                <button onclick="saveLayout()" class="flex-1 bg-[#F99FC9] text-white py-2 rounded text-xs font-bold uppercase tracking-wider hover:opacity-90">Apply & Save</button>
+                <button onclick="resetLayout()" class="flex-1 bg-slate-200 text-slate-600 py-2 rounded text-xs font-bold uppercase tracking-wider hover:bg-slate-300">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full mx-auto py-10 px-4">
         <header class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold text-[##F7CED7] mb-2">Newton-Raphson Solver</h1>
-            <p class="text-slate-500">Solve complex exponential equations using the "Getting Warmer" method.</p>
+            <h1 class="text-4xl font-extrabold text-white mb-2 drop-shadow-md">Newton-Raphson Solver</h1>
+            <p class="text-slate-500 font-medium">Solve complex exponential equations using the "Getting Warmer" method.</p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div id="canvas-area" class="relative w-full max-w-6xl mx-auto min-h-[900px]">
             
-            <div class="bg-white p-6 rounded-xl shadow-md border border-[#F7CED7]">
+            <div id="card-input" class="layout-card absolute bg-white p-6 rounded-xl shadow-md border border-[#F7CED7]">
                 <h2 class="text-xl font-bold mb-4 border-b border-[#F7CED7] pb-2 text-slate-700">1. Input Equation</h2>
-                
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">Function f(x)</label>
-                        <input id="equation" type="text" value="e^x - 5" 
-                               class="w-full p-2 border border-[#F7CED7] rounded focus:ring-2 focus:ring-[#F7CED7] outline-none">
+                        <input id="equation" type="text" value="e^x - 5" class="w-full p-2 border border-[#F7CED7] rounded focus:ring-2 focus:ring-[#F99FC9] outline-none">
                         <p class="text-xs text-slate-400 mt-1">Use 'e^x' for exponentials.</p>
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium mb-1">Initial Guess (x₀)</label>
-                        <input id="guess" type="number" value="1" 
-                               class="w-full p-2 border border-[#F7CED7] rounded focus:ring-2 focus:ring-[#F7CED7] outline-none">
+                        <input id="guess" type="number" value="1" class="w-full p-2 border border-[#F7CED7] rounded focus:ring-2 focus:ring-[#F99FC9] outline-none">
                     </div>
-
-                    <button onclick="solve()" 
-                            class="w-full bg-[#F7CED7] hover:opacity-90 text-white font-bold py-2 rounded transition shadow-sm">
+                    <button onclick="solve()" class="w-full bg-[#F99FC9] hover:opacity-90 text-white font-bold py-3 rounded transition shadow-sm uppercase tracking-wider">
                         Solve Now
                     </button>
                 </div>
-
                 <div class="mt-8 p-3 bg-[#F7CED7] bg-opacity-30 rounded-lg border border-[#F7CED7]">
                     <h3 class="text-sm font-bold text-slate-700 uppercase">Fail-Safe Tips</h3>
                     <ul class="text-xs text-slate-600 list-disc ml-4 mt-2 space-y-1">
                         <li>If it fails, try a different starting guess.</li>
                         <li>Avoid points where the slope is zero.</li>
-                        <li>The equation must equal zero ($f(x) = 0$).</li>
+                        <li>The equation must equal zero (f(x) = 0).</li>
                     </ul>
                 </div>
             </div>
 
-            <div class="md:col-span-2 space-y-6">
-                
-                <div id="resultCard" class="hidden bg-[#F99FC9] text-white p-6 rounded-xl shadow-lg">
-                    <h2 class="text-lg opacity-80 uppercase tracking-widest font-bold">The Answer</h2>
-                    <p id="finalAnswer" class="text-5xl font-mono font-bold mt-2">0.0000</p>
-                </div>
+            <div id="card-answer" class="layout-card absolute bg-[#F99FC9] text-white p-6 rounded-xl shadow-lg flex flex-col justify-center">
+                <h2 class="text-sm opacity-80 uppercase tracking-widest font-bold">The Answer</h2>
+                <p id="finalAnswer" class="text-5xl font-mono font-bold mt-2">[ Pending ]</p>
+            </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-md border border-[#F99FC9]">
-                    <h2 class="text-xl font-bold mb-4 text-slate-700">Graph Visualization</h2>
-                    <canvas id="resultChart" height="150"></canvas>
+            <div id="card-graph" class="layout-card absolute bg-white p-6 rounded-xl shadow-md border border-[#F99FC9] flex flex-col">
+                <h2 class="text-xl font-bold mb-4 text-slate-700">Graph Visualization</h2>
+                <div class="flex-1 relative w-full h-full">
+                    <canvas id="resultChart"></canvas>
                 </div>
+            </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-md border border-[#F7CED7] overflow-x-auto">
-                    <h2 class="text-xl font-bold mb-4 text-slate-700">Step-by-Step Iterations</h2>
+            <div id="card-table" class="layout-card absolute bg-white p-6 rounded-xl shadow-md border border-[#F7CED7] flex flex-col">
+                <h2 class="text-xl font-bold mb-4 text-slate-700">Step-by-Step Iterations</h2>
+                <div class="flex-1 overflow-y-auto">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-[#F7CED7] uppercase text-slate-700 text-xs">
+                        <thead class="bg-[#F7CED7] uppercase text-slate-700 text-xs sticky top-0">
                             <tr>
                                 <th class="p-2">n</th>
                                 <th class="p-2">xₙ (Guess)</th>
@@ -74,15 +93,114 @@
                             </tr>
                         </thead>
                         <tbody id="tableBody">
-                            </tbody>
+                            <tr><td colspan="3" class="p-4 text-center text-slate-400 italic">Enter an equation and click solve...</td></tr>
+                        </tbody>
                     </table>
                 </div>
-
             </div>
+
         </div>
     </div>
 
     <script>
+        // ==========================================
+        // 1. LAYOUT MANAGER (Local Storage & Editor)
+        // ==========================================
+        
+        // The default sizes and positions
+        const DEFAULT_LAYOUT = {
+            input:  { top: '0px',   left: '0%',   width: '32%', height: 'auto' },
+            answer: { top: '0px',   left: '35%',  width: '65%', height: '120px' },
+            graph:  { top: '150px', left: '35%',  width: '65%', height: '350px' },
+            table:  { top: '530px', left: '35%',  width: '65%', height: '300px' }
+        };
+
+        const CARD_NAMES = {
+            input: "1. Input Equation",
+            answer: "2. The Answer",
+            graph: "3. Graph Visualization",
+            table: "4. Data Table"
+        };
+
+        let currentLayout = JSON.parse(localStorage.getItem('nr_solver_layout')) || DEFAULT_LAYOUT;
+
+        function applyLayout() {
+            Object.keys(currentLayout).forEach(key => {
+                const el = document.getElementById(`card-${key}`);
+                if (el) {
+                    el.style.top = currentLayout[key].top;
+                    el.style.left = currentLayout[key].left;
+                    el.style.width = currentLayout[key].width;
+                    el.style.height = currentLayout[key].height;
+                }
+            });
+        }
+
+        function renderEditorFields() {
+            const container = document.getElementById('editor-fields');
+            container.innerHTML = '';
+            
+            Object.keys(currentLayout).forEach(key => {
+                const config = currentLayout[key];
+                container.innerHTML += `
+                    <div class="border border-slate-200 p-3 rounded bg-slate-50">
+                        <h4 class="font-bold text-xs text-[#F99FC9] uppercase mb-2">${CARD_NAMES[key]}</h4>
+                        <div class="grid grid-cols-2 gap-2 text-[10px]">
+                            <div><label>Top</label><input type="text" id="edit-${key}-top" value="${config.top}" class="w-full p-1 border rounded"></div>
+                            <div><label>Left</label><input type="text" id="edit-${key}-left" value="${config.left}" class="w-full p-1 border rounded"></div>
+                            <div><label>Width</label><input type="text" id="edit-${key}-width" value="${config.width}" class="w-full p-1 border rounded"></div>
+                            <div><label>Height</label><input type="text" id="edit-${key}-height" value="${config.height}" class="w-full p-1 border rounded"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function saveLayout() {
+            Object.keys(currentLayout).forEach(key => {
+                currentLayout[key].top = document.getElementById(`edit-${key}-top`).value;
+                currentLayout[key].left = document.getElementById(`edit-${key}-left`).value;
+                currentLayout[key].width = document.getElementById(`edit-${key}-width`).value;
+                currentLayout[key].height = document.getElementById(`edit-${key}-height`).value;
+            });
+            localStorage.setItem('nr_solver_layout', JSON.stringify(currentLayout));
+            applyLayout();
+            
+            // Resize chart if layout changes
+            if(myChart) myChart.resize();
+        }
+
+        function resetLayout() {
+            if(confirm("Reset all cards to default layout?")) {
+                currentLayout = JSON.parse(JSON.stringify(DEFAULT_LAYOUT)); // deep copy
+                localStorage.removeItem('nr_solver_layout');
+                renderEditorFields();
+                applyLayout();
+                if(myChart) myChart.resize();
+            }
+        }
+
+        function toggleEditor() {
+            const content = document.getElementById('editorContent');
+            const icon = document.getElementById('editorToggleIcon');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.innerText = '▲';
+            } else {
+                content.classList.add('hidden');
+                icon.innerText = '▼';
+            }
+        }
+
+        // Initialize Layout
+        applyLayout();
+        renderEditorFields();
+
+
+        // ==========================================
+        // 2. NEWTON-RAPHSON SOLVER LOGIC
+        // ==========================================
+        
         let myChart; 
 
         function solve() {
@@ -107,7 +225,7 @@
                     iterations.push({ n: n, x: xCurr, y: fx });
                     
                     tableBody.innerHTML += `
-                        <tr class="border-b border-[#F7CED7]">
+                        <tr class="border-b border-[#F7CED7] hover:bg-[#F7CED7]/20">
                             <td class="p-2 font-bold">${n}</td>
                             <td class="p-2 font-mono">${xCurr.toFixed(6)}</td>
                             <td class="p-2 font-mono">${fx.toFixed(6)}</td>
@@ -124,9 +242,7 @@
                     xCurr = xCurr - (fx / dfx);
                 }
 
-                document.getElementById('resultCard').classList.remove('hidden');
                 document.getElementById('finalAnswer').innerText = xCurr.toFixed(6);
-
                 updateChart(iterations, f);
 
             } catch (err) {
@@ -158,7 +274,7 @@
                         {
                             label: 'f(x) Curve',
                             data: data,
-                            borderColor: '#F99FC9', // Curve color updated
+                            borderColor: '#F99FC9',
                             borderWidth: 3,
                             pointRadius: 0,
                             fill: false
@@ -166,7 +282,7 @@
                         {
                             label: 'Newton Steps',
                             data: iterations.map(it => ({x: it.x.toFixed(1), y: it.y})),
-                            backgroundColor: '#F99FC9', // Step points updated
+                            backgroundColor: '#F99FC9',
                             borderColor: '#F99FC9',
                             showLine: false,
                             pointRadius: 6,
@@ -176,10 +292,11 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false, // Allows custom canvas height from layout editor
                     scales: {
                         y: { 
                             beginAtZero: false,
-                            grid: { color: '#F7CED7' } // Grid lines updated
+                            grid: { color: '#F7CED7' } 
                         },
                         x: {
                             grid: { color: '#F7CED7' }
