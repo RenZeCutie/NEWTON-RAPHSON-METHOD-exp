@@ -39,7 +39,10 @@
         <header class="text-center mb-10">
             <h1 class="text-4xl font-extrabold text-white mb-2 drop-shadow-md">Newton-Raphson Solver</h1>
             <p class="text-slate-500 font-medium">Solve complex exponential equations using the "Getting Warmer" method.</p>
-            <p class="text-slate-500 font-medium">submitted by LOZANO, LAWRENZE EDWARD and ALFORQUE, CARL JOHN.</p>
+            
+            <p class="text-xs font-bold text-slate-600 mt-3 tracking-widest uppercase bg-white/50 inline-block px-4 py-1.5 rounded-full border border-white/60 shadow-sm">
+                SUBMITTED BY LOZANO , LAWRENZE EDWARD AND ALFORQUE , CARL JOHN OF BSCPE 22005
+            </p>
 
         </header>
 
@@ -109,7 +112,6 @@
         // 1. LAYOUT MANAGER (Local Storage & Editor)
         // ==========================================
         
-        // The default sizes and positions
         const DEFAULT_LAYOUT = {
             input:  { top: '0px',   left: '0%',   width: '32%', height: 'auto' },
             answer: { top: '0px',   left: '35%',  width: '65%', height: '120px' },
@@ -168,13 +170,12 @@
             localStorage.setItem('nr_solver_layout', JSON.stringify(currentLayout));
             applyLayout();
             
-            // Resize chart if layout changes
             if(myChart) myChart.resize();
         }
 
         function resetLayout() {
             if(confirm("Reset all cards to default layout?")) {
-                currentLayout = JSON.parse(JSON.stringify(DEFAULT_LAYOUT)); // deep copy
+                currentLayout = JSON.parse(JSON.stringify(DEFAULT_LAYOUT)); 
                 localStorage.removeItem('nr_solver_layout');
                 renderEditorFields();
                 applyLayout();
@@ -194,7 +195,6 @@
             }
         }
 
-        // Initialize Layout
         applyLayout();
         renderEditorFields();
 
@@ -294,7 +294,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // Allows custom canvas height from layout editor
+                    maintainAspectRatio: false, 
                     scales: {
                         y: { 
                             beginAtZero: false,
